@@ -252,16 +252,16 @@ class _RatingStarsState extends State<RatingStars>
     if (!action) return _star;
     return ElevatedButton(
       style: ButtonStyle(
-        shape: MaterialStateProperty.all<OutlinedBorder>(RoundedRectangleBorder(
+        shape: WidgetStateProperty.all<OutlinedBorder>(RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(widget.starSize / 2))),
-        minimumSize: MaterialStateProperty.all<Size>(
+        minimumSize: WidgetStateProperty.all<Size>(
             Size(widget.starSize, widget.starSize)),
-        padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.zero),
-        elevation: MaterialStateProperty.all<double>(0.0),
+        padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.zero),
+        elevation: WidgetStateProperty.all<double>(0.0),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+        backgroundColor: WidgetStateProperty.all<Color>(Colors.transparent),
         overlayColor:
-            MaterialStateProperty.all<Color>(widget.starColor.withOpacity(0.2)),
+            WidgetStateProperty.all<Color>(widget.starColor.withOpacity(0.2)),
         animationDuration: Duration(milliseconds: 100),
       ),
       onPressed: widget.onValueChanged == null
@@ -300,7 +300,7 @@ class _RatingStarsState extends State<RatingStars>
             return Container(
               margin: index == widget.starCount - 1
                   ? null
-                  : EdgeInsets.symmetric(horizontal: widget.starSpacing / 2),
+                  : EdgeInsetsDirectional.only(end: widget.starSpacing),
               alignment: Alignment.center,
               child: builder.call(context, index),
             );
