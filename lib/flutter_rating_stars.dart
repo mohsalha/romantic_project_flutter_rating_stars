@@ -5,105 +5,27 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/generated/assets.dart';
 
-/// This is a RatingStars widget. it shows a row of stars that describes how many scores a field gets.
-/// Star items have an action also that allows use in more cases.
-///
-/// {@tool snippet}
-/// Example:
-/// ```dart
-///          RatingStars(
-///             value: value,
-///             onValueChanged: (v) {
-///               //
-///               setState(() {
-///                 value = v;
-///               });
-///             },
-///             starBuilder: (index, color) => Icon(
-///               Icons.ac_unit_outlined,
-///               color: color,
-///             ),
-///             starCount: 5,
-///             starSize: 20,
-///             valueLabelColor: const Color(0xff9b9b9b),
-///             valueLabelTextStyle: const TextStyle(
-///                 color: Colors.white,
-///                 fontWeight: FontWeight.w400,
-///                 fontStyle: FontStyle.normal,
-///                 fontSize: 12.0),
-///             valueLabelRadius: 10,
-///             maxValue: 5,
-///             starSpacing: 2,
-///             maxValueVisibility: true,
-///             valueLabelVisibility: true,
-///             animationDuration: Duration(milliseconds: 1000),
-///             valueLabelPadding:
-///                 const EdgeInsets.symmetric(vertical: 1, horizontal: 8),
-///             valueLabelMargin: const EdgeInsets.only(right: 8),
-///             starOffColor: const Color(0xffe7e8ea),
-///             starColor: Colors.yellow,
-///          )
-/// ```
-/// {@end-tool}
 class RatingStars extends StatefulWidget {
-  /// [maxValue]
   final double maxValue;
-
-  /// [value] is value in 0...[maxValue].
   final double value;
-
-  /// [starCount] count of stars, whatever you want.
   final int starCount;
-
-  /// [starSize] is size of star widget.
   final double starSize;
-
-  /// [valueLabelColor] is the color background of label widget.
   final Color valueLabelColor;
-
-  /// [valueLabelTextStyle] is the textStyle of text widget inside the label.
   final TextStyle valueLabelTextStyle;
-
-  /// [valueLabelRadius] is the border radius of the label widget.
   final double valueLabelRadius;
-
-  /// [starSpacing] is spacing between stars.
   final double starSpacing;
-
-  /// [maxValueVisibility] show/hide max value in value label at the left side.
   final bool maxValueVisibility;
-
-  /// [valueLabelVisibility] show/hide value label at the left side.
   final bool valueLabelVisibility;
-
-  /// [valueLabelPadding] is the padding of the label widget.
   final EdgeInsets valueLabelPadding;
-
-  /// [valueLabelMargin] is the margin of label widget.
   final EdgeInsets valueLabelMargin;
-
-  /// [starOffColor] is the color of the star widget that [value] doesn't reach yet.
   final Color starOffColor;
-
-  /// [starColor]  is the color of the star widget that [value] reaches.
   final Color starColor;
-
-  /// [onValueChanged] if it is not null RatingStars is able to click to change the value, and it is calculated by rounded star count only. Ex: [maxValue] is 12, [starCount] is 5, clicked on 3th star, [onValueChanged] is called with [value] is 3*12/5=7.2
   final Function(double value)? onValueChanged;
-
-  /// [starBuilder] use to build your own star widget. By default, it use a star image from assets.
   final Widget Function(int index, Color? color)? starBuilder;
-
-  /// [animationDuration] animated when the [value] is changed.
   final Duration animationDuration;
-
-  /// [axis] change [Axis]
   final Axis axis;
-
-  /// [angle] to turn all stars in around z-axis, in degree.
   final double angle;
 
-  /// Constructor
   const RatingStars({
     Key? key,
     this.value = 0,
@@ -185,31 +107,35 @@ class _RatingStarsState extends State<RatingStars>
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(widget.valueLabelRadius)),
           ),
-        Stack(
-          children: [
-            _buildListStars(
-                builder: (context, index) =>
-                    _starWidget(index, true, widget.starOffColor)),
-            IgnorePointer(
-              child: AnimatedBuilder(
-                animation: _animationController!,
-                builder: (context, child) {
-                  return _buildClipRect(
-                    builder: (context) => _buildListStars(
-                      builder: (context, index) => Transform.scale(
-                        scale: Tween<double>(begin: 0.0, end: 1.0)
-                            .chain(CurveTween(
-                                curve: Interval(0.15 * index, 1.0,
-                                    curve: Curves.elasticOut)))
-                            .evaluate(_animationController!),
-                        child: _starWidget(index, false, widget.starColor),
+        // إضافة SizedBox لضمان المحاذاة
+        SizedBox(
+          height: widget.starSize,
+          child: Stack(
+            children: [
+              _buildListStars(
+                  builder: (context, index) =>
+                      _starWidget(index, true, widget.starOffColor)),
+              IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: _animationController!,
+                  builder: (context, child) {
+                    return _buildClipRect(
+                      builder: (context) => _buildListStars(
+                        builder: (context, index) => Transform.scale(
+                          scale: Tween<double>(begin: 0.0, end: 1.0)
+                              .chain(CurveTween(
+                                  curve: Interval(0.15 * index, 1.0,
+                                      curve: Curves.elasticOut)))
+                              .evaluate(_animationController!),
+                          child: _starWidget(index, false, widget.starColor),
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -233,46 +159,53 @@ class _RatingStarsState extends State<RatingStars>
   }
 
   Widget _starWidget(int index, bool action, [Color? color]) {
-    var _star = Transform.rotate(
-      angle: widget.angle * math.pi / 180.0,
-      child: widget.starBuilder != null
-          ? SizedBox(
-              child: widget.starBuilder!(index, color),
-              width: widget.starSize,
-              height: widget.starSize,
-            )
-          : Image.asset(
-              Assets.assetsStarOff,
-              width: widget.starSize,
-              height: widget.starSize,
-              package: 'flutter_rating_stars',
-              color: color,
-            ),
-    );
-    if (!action) return _star;
-    return ElevatedButton(
-      style: ButtonStyle(
-        shape: WidgetStateProperty.all<OutlinedBorder>(RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(widget.starSize / 2))),
-        minimumSize: WidgetStateProperty.all<Size>(
-            Size(widget.starSize, widget.starSize)),
-        padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.zero),
-        elevation: WidgetStateProperty.all<double>(0.0),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        backgroundColor: WidgetStateProperty.all<Color>(Colors.transparent),
-        overlayColor:
-            WidgetStateProperty.all<Color>(widget.starColor.withOpacity(0.2)),
-        animationDuration: Duration(milliseconds: 100),
+    var _star = Center(
+      child: Transform.rotate(
+        angle: widget.angle * math.pi / 180.0,
+        child: widget.starBuilder != null
+            ? SizedBox(
+                child: widget.starBuilder!(index, color),
+                width: widget.starSize,
+                height: widget.starSize,
+              )
+            : Image.asset(
+                Assets.assetsStarOff,
+                width: widget.starSize,
+                height: widget.starSize,
+                package: 'flutter_rating_stars',
+                color: color,
+              ),
       ),
-      onPressed: widget.onValueChanged == null
-          ? null
-          : () {
-              var v = index + 1.0;
-              v = v * widget.maxValue / widget.starCount;
-              // print('_RatingStarsState._starWidget.onValueChanged: $v');
-              widget.onValueChanged!(v);
-            },
-      child: _star,
+    );
+
+    if (!action) return _star;
+
+    return SizedBox(
+      width: widget.starSize,
+      height: widget.starSize,
+      child: ElevatedButton(
+        style: ButtonStyle(
+          shape: WidgetStateProperty.all<OutlinedBorder>(RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(widget.starSize / 2))),
+          minimumSize: WidgetStateProperty.all<Size>(
+              Size(widget.starSize, widget.starSize)),
+          padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.zero),
+          elevation: WidgetStateProperty.all<double>(0.0),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          backgroundColor: WidgetStateProperty.all<Color>(Colors.transparent),
+          overlayColor:
+              WidgetStateProperty.all<Color>(widget.starColor.withOpacity(0.2)),
+          animationDuration: Duration(milliseconds: 100),
+        ),
+        onPressed: widget.onValueChanged == null
+            ? null
+            : () {
+                var v = index + 1.0;
+                v = v * widget.maxValue / widget.starCount;
+                widget.onValueChanged!(v);
+              },
+        child: _star,
+      ),
     );
   }
 
@@ -302,6 +235,7 @@ class _RatingStarsState extends State<RatingStars>
                   ? null
                   : EdgeInsetsDirectional.only(end: widget.starSpacing),
               alignment: Alignment.center,
+              height: widget.starSize,
               child: builder.call(context, index),
             );
           },
